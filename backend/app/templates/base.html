@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Реестр сотрудников{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Небольшие доработки, например для hover на фото */
+        .hover-scale:hover {
+            transform: scale(1.5);
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Реестр сотрудников</h1>
+            <hr class="mt-2 border-gray-300">
+        </header>
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            &copy; 2026 Тестовое задание
+        </footer>
+    </div>
+</body>
+</html>

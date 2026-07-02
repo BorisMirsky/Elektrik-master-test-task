@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Список сотрудников{% endblock %}
+
+{% block content %}
+<div>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold">Все сотрудники</h2>
+        <a href="/employees/create" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            + Добавить сотрудника
+        </a>
+    </div>
+
+
+<form method="get" class="bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div>
+        <label class="block text-sm font-medium text-gray-700">Поиск</label>
+        <input type="text" name="search" value="{{ search }}" 
+               placeholder="Имя или телефон" class="mt-1 w-full border rounded px-3 py-2">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700">Пол</label>
+        <select name="gender" class="mt-1 w-full border rounded px-3 py-2">
+            <option value="">Все</option>
+            <option value="male" {% if gender == 'male' %}selected{% endif %}>Мужской</option>
+            <option value="female" {% if gender == 'female' %}selected{% endif %}>Женский</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700">Возраст от</label>
+        <input type="number" name="age_min" value="{{ age_min }}" 
+               min="0" class="mt-1 w-full border rounded px-3 py-2">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700">Возраст до</label>
+        <input type="number" name="age_max" value="{{ age_max }}" 
+               min="0" class="mt-1 w-full border rounded px-3 py-2">
+    </div>
+    <div class="flex items-end space-x-2">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
+            Применить
+        </button>
+        <a href="/" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded w-full text-center">
+            Сбросить
+        </a>
+    </div>
+</form>
+
+    <!-- Таблица -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">№</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Фото</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Имя</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Возраст</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Телефон</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Пол</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Действия</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for employee in employees %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">{{ loop.index + (page - 1) * limit }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if employee.photo_path %}
+                        <img src="{{ employee.photo_path }}" alt="Фото" class="w-12 h-12 rounded-full object-cover hover:scale-150 transition-transform duration-200">
+                        {% else %}
+                        <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
+                            Нет
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ employee.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ employee.age }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ employee.phone }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if employee.gender == 'male' %}
+                        <span class="px-2 py-1 text-blue-800 bg-blue-100 rounded">М</span>
+                        {% else %}
+                        <span class="px-2 py-1 text-pink-800 bg-pink-100 rounded">Ж</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap space-x-2">
+                        <a href="/employees/{{ employee.id }}/edit" class="text-blue-600 hover:text-blue-900">Изменить</a>
+                        <form method="post" action="/employees/{{ employee.id }}/delete" class="inline-block">
+                            <button type="submit" onclick="return confirm('Удалить сотрудника?')" class="text-red-600 hover:text-red-900">
+                                Удалить
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">Сотрудников не найдено</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Пагинация -->
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-600">
+            Страница {{ page }}
+        </div>
+        <div class="space-x-2">
+            {% if has_prev %}
+            <a href="?page={{ page - 1 }}{% if search %}&search={{ search }}{% endif %}{% if gender %}&gender={{ gender }}{% endif %}{% if age_min %}&age_min={{ age_min }}{% endif %}{% if age_max %}&age_max={{ age_max }}{% endif %}"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Назад
+            </a>
+            {% endif %}
+            {% if has_next %}
+            <a href="?page={{ page + 1 }}{% if search %}&search={{ search }}{% endif %}{% if gender %}&gender={{ gender }}{% endif %}{% if age_min %}&age_min={{ age_min }}{% endif %}{% if age_max %}&age_max={{ age_max }}{% endif %}"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Вперёд
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

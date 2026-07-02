@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{% if employee %}Редактирование{% else %}Новый сотрудник{% endif %}{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow max-w-xl mx-auto">
+    <h2 class="text-2xl font-semibold mb-6">
+        {% if employee %}Редактирование сотрудника{% else %}Добавление сотрудника{% endif %}
+    </h2>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Имя *</label>
+            <input type="text" name="name" value="{{ employee.name if employee else '' }}" required
+                   class="mt-1 w-full border rounded px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Возраст *</label>
+            <input type="number" name="age" value="{{ employee.age if employee else '' }}" required min="0"
+                   class="mt-1 w-full border rounded px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Телефон *</label>
+            <input type="text" name="phone" value="{{ employee.phone if employee else '' }}" required
+                   class="mt-1 w-full border rounded px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Пол *</label>
+            <select name="gender" required class="mt-1 w-full border rounded px-3 py-2">
+                <option value="">Выберите</option>
+                <option value="male" {% if employee and employee.gender == 'male' %}selected{% endif %}>Мужской</option>
+                <option value="female" {% if employee and employee.gender == 'female' %}selected{% endif %}>Женский</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Фото</label>
+            {% if employee and employee.photo_path %}
+                <div class="mb-2">
+                    <img src="{{ employee.photo_path }}" alt="Текущее фото" class="w-20 h-20 rounded-full object-cover">
+                    <span class="text-sm text-gray-500">Текущее фото</span>
+                </div>
+            {% endif %}
+            <input type="file" name="photo" accept="image/*" class="mt-1 w-full">
+            <p class="text-xs text-gray-500 mt-1">Оставьте пустым, чтобы сохранить текущее фото</p>
+        </div>
+        <div class="flex space-x-2">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
+                Сохранить
+            </button>
+            <a href="/" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded">
+                Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

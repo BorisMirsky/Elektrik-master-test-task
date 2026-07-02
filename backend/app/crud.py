@@ -39,22 +39,23 @@ def get_employee(db: Session, employee_id: int) -> Optional[Employee]:
     """Возвращает одного сотрудника по ID или None, если не найден."""
     return db.query(Employee).filter(Employee.id == employee_id).first()
 
-def create_employee(db: Session, employee: EmployeeCreate) -> Employee:
-    """Создаёт нового сотрудника и возвращает его."""
-    db_employee = Employee(**employee.model_dump())
+def create_employee(db: Session, employee: EmployeeCreate, photo_path: Optional[str] = None) -> Employee:
+    db_employee = Employee(**employee.model_dump(), photo_path=photo_path)
     db.add(db_employee)
     db.commit()
     db.refresh(db_employee)
     return db_employee
 
-def update_employee(db: Session, employee_id: int, employee_update: EmployeeUpdate) -> Optional[Employee]:
-    """Обновляет данные сотрудника. Возвращает обновлённого или None, если не найден."""
+def update_employee(db: Session, employee_id: int, employee_update: EmployeeUpdate, photo_path: Optional[str] = None) -> Optional[Employee]:
+    """Обновляет сотрудника. Если передан photo_path, обновляет и его."""
     db_employee = get_employee(db, employee_id)
     if not db_employee:
         return None
     update_data = employee_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_employee, key, value)
+    if photo_path is not None:
+        db_employee.photo_path = photo_path
     db.commit()
     db.refresh(db_employee)
     return db_employee

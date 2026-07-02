@@ -17,7 +17,7 @@ def read_employees(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     search: Optional[str] = None,
-    gender: Optional[str] = Query(None, regex="^(male|female)$"),
+    gender: Optional[str] = Query(None, pattern="^(male|female)$"),
     age_min: Optional[int] = Query(None, ge=0),
     age_max: Optional[int] = Query(None, ge=0)
 ):

@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.routers import employees
+from fastapi.staticfiles import StaticFiles 
+from fastapi.templating import Jinja2Templates
+
+from app.routers import employees, pages 
+
 
 app = FastAPI(
     title="Реестр сотрудников",
@@ -18,8 +22,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Подключаем роутер
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
 app.include_router(employees.router)
+app.include_router(pages.router) 
+
 
 # Корневой эндпоинт для проверки
 @app.get("/")
