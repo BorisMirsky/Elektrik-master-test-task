@@ -1,47 +1,111 @@
-from pydantic import BaseModel, Field, field_validator, computed_field
 from datetime import date
 from typing import Optional
+from pydantic import BaseModel, Field, computed_field, field_validator
+import re
+
 
 class EmployeeCreate(BaseModel):
-    name: str = Field(..., min_length=1, description="Имя сотрудника")
-    birth_date: date = Field(..., description="Дата рождения")
-    phone: str = Field(..., min_length=1, description="Номер телефона")
-    gender: str = Field(..., pattern="^(male|female)$", description="Пол (male/female)")
+    surname: str = Field(..., min_length=1)
+    first_name: str = Field(..., min_length=1)
+    patronymic: Optional[str] = Field(None, min_length=0)
+    birth_date: date
+    phone: Optional[str] = None
+    gender: str = Field(..., pattern="^(male|female)$")
 
-    @field_validator("name", "phone")
-    def not_empty(cls, v):
-        if not v or not v.strip():
-            raise ValueError("Поле не может быть пустым")
+    @field_validator("surname", "first_name")
+    def validate_name(cls, v):
+        if not re.match(r"^[A-Za-zА-Яа-яЁё\s\-]+$", v):
+            raise ValueError("Допустимы только буквы, пробелы и дефис")
         return v.strip()
 
+    # @field_validator("patronymic")
+    # def validate_patronymic(cls, v):
+    #     if v is not None and v != "" and not re.match(r"^[A-Za-zА-Яа-яЁё\s\-]+$", v):
+    #         raise ValueError("Допустимы только буквы, пробелы и дефис")
+    #     return v.strip() if v else None
+
+    @field_validator("patronymic")
+    def validate_patronymic(cls, v):
+        if v is None or v == "":
+            return None
+        if not re.match(r"^[A-Za-zА-Яа-яЁё\s\-]+$", v):
+            raise ValueError("Допустимы только буквы, пробелы и дефис")
+        return v.strip()
+
+    @field_validator("phone")
+    def validate_phone(cls, v):
+        if v is None or v == "":
+            return None
+        digits = re.sub(r"\D", "", v)
+        if len(digits) != 11:
+            raise ValueError("Номер должен содержать 11 цифр")
+        return f"+{digits}"
+
+
 class EmployeeUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1)
+    surname: Optional[str] = Field(None, min_length=1)
+    first_name: Optional[str] = Field(None, min_length=1)
+    patronymic: Optional[str] = Field(None, min_length=0)
     birth_date: Optional[date] = None
-    phone: Optional[str] = Field(None, min_length=1)
+    phone: Optional[str] = None
     gender: Optional[str] = Field(None, pattern="^(male|female)$")
 
-    @field_validator("name", "phone")
-    def not_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError("Поле не может быть пустым")
-        return v.strip() if v is not None else v
+
+    @field_validator("surname", "first_name")
+    def validate_name(cls, v):
+        if v is not None and not re.match(r"^[A-Za-zА-Яа-яЁё\s\-]+$", v):
+            raise ValueError("Допустимы только буквы, пробелы и дефис")
+        return v.strip() if v else v
+
+    # @field_validator("patronymic")
+    # def validate_patronymic(cls, v):
+    #     if v is not None and v != "" and not re.match(r"^[A-Za-zА-Яа-яЁё\s\-]+$", v):
+    #         raise ValueError("Допустимы только буквы, пробелы и дефис")
+    #     return v.strip() if v else None
+    
+
+    @field_validator("patronymic")
+    def validate_patronymic(cls, v):
+        if v is None or v == "":
+            return None
+        if not re.match(r"^[A-Za-zА-Яа-яЁё\s\-]+$", v):
+            raise ValueError("Допустимы только буквы, пробелы и дефис")
+        return v.strip()
+
+    @field_validator("phone")
+    def validate_phone(cls, v):
+        if v is None or v == "":
+            return None
+        digits = re.sub(r"\D", "", v)
+        if len(digits) != 11:
+            raise ValueError("Номер должен содержать 11 цифр")
+        return f"+{digits}"
 
 class EmployeeOut(BaseModel):
     id: int
-    name: str
+    surname: str
+    first_name: str
+    patronymic: Optional[str] = None
     birth_date: date
-    phone: str
+    phone: Optional[str] = None
     gender: str
     photo_path: Optional[str] = None
 
     @computed_field
     @property
+    def full_name(self) -> str:
+        parts = [self.surname, self.first_name]
+        if self.patronymic:
+            parts.append(self.patronymic)
+        return " ".join(parts)
+
+    @computed_field
+    @property
     def age(self) -> int:
         today = date.today()
-        # Вычисляем возраст (учитываем день рождения)
         return today.year - self.birth_date.year - (
             (today.month, today.day) < (self.birth_date.month, self.birth_date.day)
         )
 
     class Config:
-        from_attributes = True  # позволяет работать с SQLAlchemy-моделями
+        from_attributes = True

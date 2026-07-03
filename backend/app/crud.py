@@ -26,7 +26,9 @@ def get_employees(
         search_term = f"%{search}%"
         query = query.filter(
             or_(
-                Employee.name.ilike(search_term),
+                Employee.surname.ilike(search_term),
+                Employee.first_name.ilike(search_term),
+                Employee.patronymic.ilike(search_term),
                 Employee.phone.ilike(search_term)
             )
         )
@@ -56,12 +58,7 @@ def create_employee(db: Session, employee: EmployeeCreate, photo_path: Optional[
     db.refresh(db_employee)
     return db_employee
 
-def update_employee(
-    db: Session,
-    employee_id: int,
-    employee_update: EmployeeUpdate,
-    photo_path: Optional[str] = None
-) -> Optional[Employee]:
+def update_employee(db: Session, employee_id: int, employee_update: EmployeeUpdate, photo_path: Optional[str] = None) -> Optional[Employee]:
     db_employee = get_employee(db, employee_id)
     if not db_employee:
         return None
@@ -87,18 +84,16 @@ def count_employees(
     search: Optional[str] = None,
     gender: Optional[str] = None,
     age_min: Optional[int] = None,
-    age_max: Optional[int] = None,
-) -> int:
-    """
-    Возвращает общее количество сотрудников с учётом фильтров (без пагинации).
-    """
+    age_max: Optional[int] = None) -> int:
     query = db.query(Employee)
 
     if search:
         search_term = f"%{search}%"
         query = query.filter(
             or_(
-                Employee.name.ilike(search_term),
+                Employee.surname.ilike(search_term),
+                Employee.first_name.ilike(search_term),
+                Employee.patronymic.ilike(search_term),
                 Employee.phone.ilike(search_term)
             )
         )

@@ -10,24 +10,36 @@
 
     <form method="post" enctype="multipart/form-data" class="space-y-4">
         <div>
-            <label class="block text-sm font-medium text-gray-700">Имя *</label>
-            <input type="text" name="name" value="{{ employee.name if employee else '' }}" required
-                   class="mt-1 w-full border rounded px-3 py-2">
+            <label class="block text-sm font-medium text-gray-700">Фамилия *</label>
+            <input type="text" name="surname" value="{{ employee.surname if employee else '' }}" required
+                pattern="[A-Za-zА-Яа-яЁё\s\-]+"
+                title="Только буквы, пробелы и дефис"
+                class="mt-1 w-full border rounded px-3 py-2">
         </div>
-        <!-- <div>
-            <label class="block text-sm font-medium text-gray-700">Возраст *</label>
-            <input type="number" name="age" value="{{ employee.age if employee else '' }}" required min="0"
-                   class="mt-1 w-full border rounded px-3 py-2">
-        </div> -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Имя *</label>
+            <input type="text" name="first_name" value="{{ employee.first_name if employee else '' }}" required
+                pattern="[A-Za-zА-Яа-яЁё\s\-]+"
+                title="Только буквы, пробелы и дефис"
+                class="mt-1 w-full border rounded px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Отчество</label>
+            <input type="text" name="patronymic" value="{{ employee.patronymic or '' }}"
+                pattern="[A-Za-zА-Яа-яЁё\s\-]+"
+                title="Только буквы, пробелы и дефис"
+                class="mt-1 w-full border rounded px-3 py-2">
+        </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Дата рождения *</label>
             <input type="date" name="birth_date" value="{{ employee.birth_date if employee else '' }}" required
             class="mt-1 w-full border rounded px-3 py-2">
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">Телефон *</label>
-            <input type="text" name="phone" value="{{ employee.phone if employee else '' }}" required
-                   class="mt-1 w-full border rounded px-3 py-2">
+            <label class="block text-sm font-medium text-gray-700">Телефон</label>
+            <input type="tel" name="phone" value="{{ employee.phone or '' }}"
+                placeholder="+7(XXX)XXX-XX-XX"
+                class="mt-1 w-full border rounded px-3 py-2">
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Пол *</label>
@@ -58,4 +70,57 @@
         </div>
     </form>
 </div>
+
+<script>
+    // Маска для телефона +7(***)***-**-**
+    const phoneInput = document.querySelector('input[name="phone"]');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function (e) {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+            let formatted = '';
+            if (value.length > 0) {
+                formatted = '+7';
+                if (value.length > 1) {
+                    formatted += '(' + value.slice(1, 4);
+                    if (value.length > 4) {
+                        formatted += ')' + value.slice(4, 7);
+                        if (value.length > 7) {
+                            formatted += '-' + value.slice(7, 9);
+                            if (value.length > 9) {
+                                formatted += '-' + value.slice(9, 11);
+                            }
+                        }
+                    }
+                }
+            }
+            this.value = formatted;
+        });
+    }
+
+    // Валидация формы перед отправкой (дополнительно к HTML5)
+    document.querySelector('form')?.addEventListener('submit', function(e) {
+        const phone = document.querySelector('input[name="phone"]');
+        if (phone && phone.value) {
+            const digits = phone.value.replace(/\D/g, '');
+            if (digits.length !== 11) {
+                alert('Телефон должен содержать 11 цифр (например, +7XXXXXXXXXX)');
+                e.preventDefault();
+                return false;
+            }
+        }
+        // Проверка полей ФИО на буквы (дублируем)
+        const nameFields = ['surname', 'first_name', 'patronymic'];
+        for (let name of nameFields) {
+            const input = document.querySelector(`input[name="${name}"]`);
+            if (input && input.value && !/^[A-Za-zА-Яа-яЁё\s\-]+$/.test(input.value)) {
+                alert('Поле "' + input.name + '" должно содержать только буквы, пробелы и дефис');
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+</script>
+
+
 {% endblock %}

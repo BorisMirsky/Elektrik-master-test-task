@@ -4,10 +4,12 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from app.database import get_db
 from app.crud import (get_employees, get_employee, create_employee, update_employee, delete_employee, count_employees)
-from app.schemas import EmployeeCreate, EmployeeUpdate
+from app.schemas import EmployeeCreate, EmployeeUpdate, EmployeeOut 
 from app.file_utils import save_upload_file
 from fastapi.templating import Jinja2Templates
 import os
+from datetime import datetime
+
 
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "..", "templates"))
@@ -53,6 +55,8 @@ def index(
         age_min=age_min_int,
         age_max=age_max_int
     )
+    
+    employees_out = [EmployeeOut.model_validate(emp) for emp in employees]
 
     # Общее количество (для пагинации)
     total_employees = count_employees(
@@ -72,7 +76,7 @@ def index(
         "index.html",
         {
             "request": request,
-            "employees": employees,
+            "employees": employees_out,
             "page": page,
             "limit": limit,
             "search": search or "",
@@ -99,14 +103,20 @@ def create_form(request: Request):
 async def create_employee_handler(
     request: Request,
     db: Session = Depends(get_db),
-    name: str = Form(...),
+    surname: str = Form(...),
+    first_name: str = Form(...),
+    #patronymic: Optional[str] = Form(None),
+    patronymic: str = Form(""),
+    #phone: Optional[str] = Form(None), 
+    phone: str = Form(""),
     birth_date: Optional[str] = Form(None),
-    phone: str = Form(...),
     gender: str = Form(...),
     photo: Optional[UploadFile] = File(None),
 ):
+    patronymic_val = patronymic if patronymic != "" else None
+    phone_val = phone if phone != "" else None
+
     # Преобразуем строку в дату
-    from datetime import datetime
     try:
         birth_date_obj = datetime.strptime(birth_date, "%Y-%m-%d").date()
     except ValueError:
@@ -114,9 +124,11 @@ async def create_employee_handler(
 
     # Создаём схему
     employee_data = EmployeeCreate(
-        name=name,
+        surname=surname,
+        first_name=first_name,
+        patronymic=patronymic_val,
         birth_date=birth_date_obj,
-        phone=phone,
+        phone=phone_val,
         gender=gender
     )
     
@@ -146,32 +158,46 @@ def edit_form(request: Request, employee_id: int, db: Session = Depends(get_db))
         {"request": request, "employee": employee}
     )
 
+
 # Обработка обновления сотрудника (POST)
 @router.post("/employees/{employee_id}/edit")
 async def update_employee_handler(
     request: Request,
     employee_id: int,
     db: Session = Depends(get_db),
-    name: Optional[str] = Form(None),
     age: Optional[int] = Form(None),
+    surname: str = Form(...),
+    first_name: str = Form(...),
+    patronymic: Optional[str] = Form(None),
     phone: Optional[str] = Form(None),
     gender: Optional[str] = Form(None),
     photo: Optional[UploadFile] = File(None),
 ):
-    """
-    Принимает данные формы и обновляет сотрудника.
-    """
+
+    patronymic_val = patronymic if patronymic != "" else None
+    phone_val = phone if phone != "" else None
     # Создаём схему обновления (только переданные поля)
-    update_data = {}
-    if name is not None:
-        update_data["name"] = name
-    if age is not None:
-        update_data["age"] = age
-    if phone is not None:
-        update_data["phone"] = phone
-    if gender is not None:
-        update_data["gender"] = gender
-    
+    # update_data = {}
+    # if surname is not None:
+    #     update_data["name"] = surname
+    # if first_name is not None:
+    #     update_data["name"] = first_name
+    # if patronymic is not None:
+    #     update_data["name"] = patronymic
+    # if age is not None:
+    #     update_data["age"] = age
+    # if phone is not None:
+    #     update_data["phone"] = phone
+    # if gender is not None:
+    #     update_data["gender"] = gender
+    update_data = {
+        "surname": surname,
+        "first_name": first_name,
+        "patronymic": patronymic_val,   # None, если пусто
+        #"birth_date": birth_date_obj,
+        "phone": phone_val,             # None, если пусто
+        "gender": gender,
+    }
     employee_update = EmployeeUpdate(**update_data)
     
     # Сохраняем новое фото, если загружено
@@ -186,6 +212,7 @@ async def update_employee_handler(
     
     # Редирект на главную
     return RedirectResponse(url="/", status_code=303)
+
 
 # Удаление сотрудника (POST)
 @router.post("/employees/{employee_id}/delete")
