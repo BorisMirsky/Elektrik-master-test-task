@@ -14,10 +14,15 @@
             <input type="text" name="name" value="{{ employee.name if employee else '' }}" required
                    class="mt-1 w-full border rounded px-3 py-2">
         </div>
-        <div>
+        <!-- <div>
             <label class="block text-sm font-medium text-gray-700">Возраст *</label>
             <input type="number" name="age" value="{{ employee.age if employee else '' }}" required min="0"
                    class="mt-1 w-full border rounded px-3 py-2">
+        </div> -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Дата рождения *</label>
+            <input type="date" name="birth_date" value="{{ employee.birth_date if employee else '' }}" required
+            class="mt-1 w-full border rounded px-3 py-2">
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Телефон *</label>

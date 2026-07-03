@@ -5,7 +5,7 @@
 {% block content %}
 <div>
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-semibold">Все сотрудники</h2>
+        <h1 class="text-2xl font-semibold">Реестр сотрудников</h1>
         <a href="/employees/create" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
             + Добавить сотрудника
         </a>
@@ -102,25 +102,22 @@
     </div>
 
     <!-- Пагинация -->
-    <div class="flex justify-between items-center mt-6">
-        <div class="text-sm text-gray-600">
-            Страница {{ page }}
-        </div>
-        <div class="space-x-2">
-            {% if has_prev %}
-            <a href="?page={{ page - 1 }}{% if search %}&search={{ search }}{% endif %}{% if gender %}&gender={{ gender }}{% endif %}{% if age_min %}&age_min={{ age_min }}{% endif %}{% if age_max %}&age_max={{ age_max }}{% endif %}"
-               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Назад
-            </a>
-            {% endif %}
-            {% if has_next %}
-            <a href="?page={{ page + 1 }}{% if search %}&search={{ search }}{% endif %}{% if gender %}&gender={{ gender }}{% endif %}{% if age_min %}&age_min={{ age_min }}{% endif %}{% if age_max %}&age_max={{ age_max }}{% endif %}"
-               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Вперёд
-            </a>
-            {% endif %}
+    <div class="mt-6">
+        <div class="text-sm text-gray-600">Страницы</div>
+        <div class="flex space-x-2 mt-1">
+            {% for p in range(1, total_pages + 1) %}
+                {% if p == page %}
+                    <span class="bg-blue-600 text-white font-bold py-1 px-3 rounded">{{ p }}</span>
+                {% else %}
+                    <a href="?page={{ p }}{% if search %}&search={{ search }}{% endif %}{% if gender %}&gender={{ gender }}{% endif %}{% if age_min %}&age_min={{ age_min }}{% endif %}{% if age_max %}&age_max={{ age_max }}{% endif %}"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-1 px-3 rounded">
+                        {{ p }}
+                    </a>
+                {% endif %}
+            {% endfor %}
         </div>
     </div>
+
 </div>
 {% endblock %}
 

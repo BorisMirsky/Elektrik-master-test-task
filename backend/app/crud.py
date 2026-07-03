@@ -1,8 +1,12 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from typing import Optional, List
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from app.models import Employee
 from app.schemas import EmployeeCreate, EmployeeUpdate
+
+
 
 def get_employees(
     db: Session,
@@ -11,13 +15,13 @@ def get_employees(
     search: Optional[str] = None,
     gender: Optional[str] = None,
     age_min: Optional[int] = None,
-    age_max: Optional[int] = None
+    age_max: Optional[int] = None,
 ) -> List[Employee]:
     """
-    Возвращает список сотрудников с учётом фильтров и пагинации.
+    Возвращает список сотрудников с фильтрацией (поиск, пол, возраст) и пагинацией.
     """
     query = db.query(Employee)
-    
+
     if search:
         search_term = f"%{search}%"
         query = query.filter(
@@ -26,17 +30,23 @@ def get_employees(
                 Employee.phone.ilike(search_term)
             )
         )
+
     if gender:
         query = query.filter(Employee.gender == gender)
-    if age_min is not None:
-        query = query.filter(Employee.age >= age_min)
+
+    today = date.today()
     if age_max is not None:
-        query = query.filter(Employee.age <= age_max)
-    
+        # минимальная дата рождения = today - age_max лет
+        min_birth_date = today - relativedelta(years=age_max)
+        query = query.filter(Employee.birth_date >= min_birth_date)
+    if age_min is not None:
+        # максимальная дата рождения = today - age_min лет
+        max_birth_date = today - relativedelta(years=age_min)
+        query = query.filter(Employee.birth_date <= max_birth_date)
+
     return query.offset(skip).limit(limit).all()
 
 def get_employee(db: Session, employee_id: int) -> Optional[Employee]:
-    """Возвращает одного сотрудника по ID или None, если не найден."""
     return db.query(Employee).filter(Employee.id == employee_id).first()
 
 def create_employee(db: Session, employee: EmployeeCreate, photo_path: Optional[str] = None) -> Employee:
@@ -46,8 +56,12 @@ def create_employee(db: Session, employee: EmployeeCreate, photo_path: Optional[
     db.refresh(db_employee)
     return db_employee
 
-def update_employee(db: Session, employee_id: int, employee_update: EmployeeUpdate, photo_path: Optional[str] = None) -> Optional[Employee]:
-    """Обновляет сотрудника. Если передан photo_path, обновляет и его."""
+def update_employee(
+    db: Session,
+    employee_id: int,
+    employee_update: EmployeeUpdate,
+    photo_path: Optional[str] = None
+) -> Optional[Employee]:
     db_employee = get_employee(db, employee_id)
     if not db_employee:
         return None
@@ -61,10 +75,42 @@ def update_employee(db: Session, employee_id: int, employee_update: EmployeeUpda
     return db_employee
 
 def delete_employee(db: Session, employee_id: int) -> bool:
-    """Удаляет сотрудника. Возвращает True, если удаление прошло успешно."""
     db_employee = get_employee(db, employee_id)
     if not db_employee:
         return False
     db.delete(db_employee)
     db.commit()
     return True
+
+def count_employees(
+    db: Session,
+    search: Optional[str] = None,
+    gender: Optional[str] = None,
+    age_min: Optional[int] = None,
+    age_max: Optional[int] = None,
+) -> int:
+    """
+    Возвращает общее количество сотрудников с учётом фильтров (без пагинации).
+    """
+    query = db.query(Employee)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                Employee.name.ilike(search_term),
+                Employee.phone.ilike(search_term)
+            )
+        )
+    if gender:
+        query = query.filter(Employee.gender == gender)
+
+    today = date.today()
+    if age_max is not None:
+        min_birth_date = today - relativedelta(years=age_max)
+        query = query.filter(Employee.birth_date >= min_birth_date)
+    if age_min is not None:
+        max_birth_date = today - relativedelta(years=age_min)
+        query = query.filter(Employee.birth_date <= max_birth_date)
+
+    return query.count()

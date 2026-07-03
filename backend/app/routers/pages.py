@@ -2,26 +2,19 @@ from fastapi import APIRouter, Depends, Request, Form, UploadFile, File, HTTPExc
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from typing import Optional
-
 from app.database import get_db
-from app.crud import (
-    get_employees, get_employee, create_employee,
-    update_employee, delete_employee
-)
+from app.crud import (get_employees, get_employee, create_employee, update_employee, delete_employee, count_employees)
 from app.schemas import EmployeeCreate, EmployeeUpdate
 from app.file_utils import save_upload_file
 from fastapi.templating import Jinja2Templates
 import os
-from jinja2 import Environment, FileSystemLoader
-
 
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "..", "templates"))
 
 router = APIRouter(prefix="", tags=["pages"])
 
-# Главная страница — список сотрудников
-@router.get("/")
+
 @router.get("/")
 def index(
     request: Request,
@@ -36,10 +29,9 @@ def index(
     # Преобразуем пустые строки в None
     if gender == "":
         gender = None
-    # Валидация пола (если значение передано, проверяем, что оно корректное)
     if gender not in [None, "male", "female"]:
-        gender = None  # или можно вернуть ошибку, но лучше игнорировать
-    
+        gender = None  # игнорируем некорректные значения
+
     # Преобразуем age_min и age_max в int, если они не пустые
     age_min_int = None
     age_max_int = None
@@ -47,10 +39,11 @@ def index(
         age_min_int = int(age_min)
     if age_max is not None and age_max.isdigit():
         age_max_int = int(age_max)
-    
-    # Вычисляем смещение для пагинации
+
+    # Пагинация
     skip = (page - 1) * limit
-    
+
+    # Получаем сотрудников с фильтрацией
     employees = get_employees(
         db=db,
         skip=skip,
@@ -60,11 +53,21 @@ def index(
         age_min=age_min_int,
         age_max=age_max_int
     )
-    
-    # Пагинация
-    has_next = len(employees) == limit
+
+    # Общее количество (для пагинации)
+    total_employees = count_employees(
+        db=db,
+        search=search,
+        gender=gender,
+        age_min=age_min_int,
+        age_max=age_max_int
+    )
+    total_pages = (total_employees + limit - 1) // limit  # округление вверх
+
+    # Флаги для кнопок "Назад"/"Вперёд" (опционально, если используешь)
+    has_next = page < total_pages
     has_prev = page > 1
-    
+
     return templates.TemplateResponse(
         "index.html",
         {
@@ -76,11 +79,12 @@ def index(
             "gender": gender or "",
             "age_min": age_min or "",
             "age_max": age_max or "",
+            "total_pages": total_pages,
+            "total_employees": total_employees,
             "has_next": has_next,
-            "has_prev": has_prev
+            "has_prev": has_prev,
         }
     )
-
 
 # Страница создания нового сотрудника (GET — показываем форму)
 @router.get("/employees/create")
@@ -96,18 +100,27 @@ async def create_employee_handler(
     request: Request,
     db: Session = Depends(get_db),
     name: str = Form(...),
-    age: int = Form(...),
+    birth_date: Optional[str] = Form(None),
     phone: str = Form(...),
     gender: str = Form(...),
     photo: Optional[UploadFile] = File(None),
 ):
-    """
-    Принимает данные формы и создаёт нового сотрудника.
-    """
+    # Преобразуем строку в дату
+    from datetime import datetime
+    try:
+        birth_date_obj = datetime.strptime(birth_date, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Неверный формат даты (нужно YYYY-MM-DD)")
+
     # Создаём схему
-    employee_data = EmployeeCreate(name=name, age=age, phone=phone, gender=gender)
+    employee_data = EmployeeCreate(
+        name=name,
+        birth_date=birth_date_obj,
+        phone=phone,
+        gender=gender
+    )
     
-    # Сохраняем фото, если оно загружено
+    # Сохраняем фото (если есть)
     photo_path = None
     if photo and photo.filename:
         photo_path = await save_upload_file(photo)
@@ -115,8 +128,8 @@ async def create_employee_handler(
     # Создаём сотрудника
     create_employee(db, employee_data, photo_path)
     
-    # Редирект на главную
     return RedirectResponse(url="/", status_code=303)
+
 
 # Страница редактирования сотрудника (GET)
 @router.get("/employees/{employee_id}/edit")
