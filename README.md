@@ -18,6 +18,8 @@
 - Поиск по ФИО с учетом регистра. Поиск по части ФИО работает, но без `*`.
 - В форму создания \ редактирования добавлена валидация типа данных полей.
 - Возраст вычисляется автоматически на основе даты рождения.
+- Картинки уже лежат в Elektrik-master-test-task/backend/app/static/images. Текстовые данные надо создать самому.
+
 
 
 ## Запуск локально
@@ -42,15 +44,21 @@
 
 `pip install -r requirements.txt`
 
-4. Создайть файл .env со строкой:
+4. В `backend/` создать файл .env;
+
+`cd C:\Users\Борис\source\Elektrik-master-test-task\backend`
+
+`echo DATABASE_URL=sqlite:///./app.db > .env`
+
+Добавить в пустой файл строку:
 
 `DATABASE_URL=sqlite:///./app.db`
 
-5. Применить миграции:
+5. Находясь в `backend/` применить миграции:
 
 `alembic upgrade head`
 
-6. Запустить сервер
+6. Там же в `backend/` запустить сервер
 
 `uvicorn app.main:app --reload`
 
