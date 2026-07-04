@@ -18,11 +18,6 @@ class EmployeeCreate(BaseModel):
             raise ValueError("Допустимы только буквы, пробелы и дефис")
         return v.strip()
 
-    # @field_validator("patronymic")
-    # def validate_patronymic(cls, v):
-    #     if v is not None and v != "" and not re.match(r"^[A-Za-zА-Яа-яЁё\s\-]+$", v):
-    #         raise ValueError("Допустимы только буквы, пробелы и дефис")
-    #     return v.strip() if v else None
 
     @field_validator("patronymic")
     def validate_patronymic(cls, v):
@@ -31,6 +26,7 @@ class EmployeeCreate(BaseModel):
         if not re.match(r"^[A-Za-zА-Яа-яЁё\s\-]+$", v):
             raise ValueError("Допустимы только буквы, пробелы и дефис")
         return v.strip()
+
 
     @field_validator("phone")
     def validate_phone(cls, v):
@@ -57,12 +53,6 @@ class EmployeeUpdate(BaseModel):
             raise ValueError("Допустимы только буквы, пробелы и дефис")
         return v.strip() if v else v
 
-    # @field_validator("patronymic")
-    # def validate_patronymic(cls, v):
-    #     if v is not None and v != "" and not re.match(r"^[A-Za-zА-Яа-яЁё\s\-]+$", v):
-    #         raise ValueError("Допустимы только буквы, пробелы и дефис")
-    #     return v.strip() if v else None
-    
 
     @field_validator("patronymic")
     def validate_patronymic(cls, v):

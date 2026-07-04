@@ -21,7 +21,7 @@ def read_employees(
     age_min: Optional[int] = Query(None, ge=0),
     age_max: Optional[int] = Query(None, ge=0)
 ):
-    """Получить список сотрудников с фильтрацией и пагинацией."""
+
     employees = get_employees(
         db=db,
         skip=skip,
@@ -33,18 +33,19 @@ def read_employees(
     )
     return employees
 
+
 @router.get("/{employee_id}", response_model=EmployeeOut)
 def read_employee(employee_id: int, db: Session = Depends(get_db)):
-    """Получить одного сотрудника по ID."""
     employee = get_employee(db, employee_id)
     if not employee:
         raise HTTPException(status_code=404, detail="Сотрудник не найден")
     return employee
 
+
 @router.post("/", response_model=EmployeeOut, status_code=201)
 def create_employee_endpoint(employee: EmployeeCreate, db: Session = Depends(get_db)):
-    """Создать нового сотрудника."""
     return create_employee(db, employee)
+
 
 @router.put("/{employee_id}", response_model=EmployeeOut)
 def update_employee_endpoint(
@@ -52,11 +53,11 @@ def update_employee_endpoint(
     employee_update: EmployeeUpdate,
     db: Session = Depends(get_db)
 ):
-    """Обновить данные сотрудника."""
     updated = update_employee(db, employee_id, employee_update)
     if not updated:
         raise HTTPException(status_code=404, detail="Сотрудник не найден")
     return updated
+
 
 @router.delete("/{employee_id}", status_code=204)
 def delete_employee_endpoint(employee_id: int, db: Session = Depends(get_db)):

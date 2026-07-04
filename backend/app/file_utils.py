@@ -5,14 +5,10 @@ from fastapi import UploadFile
 UPLOAD_DIR = "app/static/images"
 
 def ensure_upload_dir():
-    """Создаёт папку для загрузок, если её нет."""
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 async def save_upload_file(file: UploadFile) -> str:
-    """
-    Сохраняет загруженный файл в папку uploads.
-    Возвращает относительный URL для доступа к файлу.
-    """
+    # Сохраняет загруженный файл в папку uploads. Возвращает относительный URL для доступа к файлу.
     ensure_upload_dir()
     
     # Генерируем уникальное имя, чтобы избежать конфликтов

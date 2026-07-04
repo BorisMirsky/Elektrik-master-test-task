@@ -98,7 +98,7 @@
         });
     }
 
-    // Валидация формы перед отправкой (дополнительно к HTML5)
+    // Валидация формы перед отправкой 
     document.querySelector('form')?.addEventListener('submit', function(e) {
         const phone = document.querySelector('input[name="phone"]');
         if (phone && phone.value) {
@@ -109,7 +109,7 @@
                 return false;
             }
         }
-        // Проверка полей ФИО на буквы (дублируем)
+        // Проверка полей ФИО на буквы 
         const nameFields = ['surname', 'first_name', 'patronymic'];
         for (let name of nameFields) {
             const input = document.querySelector(`input[name="${name}"]`);

@@ -17,9 +17,7 @@ def get_employees(
     age_min: Optional[int] = None,
     age_max: Optional[int] = None,
 ) -> List[Employee]:
-    """
-    Возвращает список сотрудников с фильтрацией (поиск, пол, возраст) и пагинацией.
-    """
+    
     query = db.query(Employee)
 
     if search:
@@ -38,11 +36,9 @@ def get_employees(
 
     today = date.today()
     if age_max is not None:
-        # минимальная дата рождения = today - age_max лет
         min_birth_date = today - relativedelta(years=age_max)
         query = query.filter(Employee.birth_date >= min_birth_date)
     if age_min is not None:
-        # максимальная дата рождения = today - age_min лет
         max_birth_date = today - relativedelta(years=age_min)
         query = query.filter(Employee.birth_date <= max_birth_date)
 
