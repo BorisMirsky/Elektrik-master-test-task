@@ -22,8 +22,9 @@
 
 ## Запуск локально
 
-1. Склонировать
-В локальном репозитории выполнить команду:
+1. Склонировать.
+
+В локальном репозитории выполнить команды:
 
 `git clone https://github.com/BorisMirsky/Elektrik-master-test-task.git`
 
@@ -41,11 +42,11 @@
 
 `pip install -r requirements.txt`
 
-4. Создайть файл .env (можно скопировать .env.example) со строкой:
+4. Создайть файл .env со строкой:
 
 `DATABASE_URL=sqlite:///./app.db`
 
-5. Применитьы миграции:
+5. Применить миграции:
 
 `alembic upgrade head`
 
@@ -63,14 +64,9 @@
 
 ## Технологии
 
-FastAPI — веб-фреймворк
-
-SQLAlchemy — ORM
-
-SQLite — база данных (локально)
-
-Alembic — миграции
-
-Jinja2 — шаблонизатор
-
-Tailwind CSS — стилизация (через CDN)
+- **FastAPI** — веб-фреймворк
+- **SQLAlchemy** — ORM
+- **SQLite** — база данных (локально)
+- **Alembic** — миграции
+- **Jinja2** — шаблонизатор
+- **Tailwind CSS** — стилизация (через CDN)
