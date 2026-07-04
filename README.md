@@ -24,6 +24,8 @@
 
 ## Запуск локально
 
+### Для всех команд ниже использовался терминал `cmd`
+
 1. Склонировать.
 
 В локальном репозитории выполнить команды:
@@ -32,7 +34,7 @@
 
 `cd Elektrik-master-test-task/backend`
 
-2. Создайть виртуальное окружение и активировать его:
+2. Создать виртуальное окружение и активировать его:
 
 `python -m venv venv`
 
@@ -44,7 +46,7 @@
 
 `pip install -r requirements.txt`
 
-4. В `backend/` создать файл .env;
+4. В `backend/` создать файл `.env`:
 
 `cd C:\Users\Борис\source\Elektrik-master-test-task\backend`
 
@@ -58,7 +60,7 @@
 
 `alembic upgrade head`
 
-6. Там же в `backend/` запустить сервер
+6. Там же в `backend/` запустить сервер:
 
 `uvicorn app.main:app --reload`
 
