@@ -52,15 +52,9 @@
 
 `pip install -r requirements.txt`
 
-4. В `backend/` создать файл `.env`:
-
-`cd C:\Users\Борис\source\Elektrik-master-test-task\backend`
+4. В `backend/` создать файл `.env` и добавить в пустой файл строку:
 
 `echo DATABASE_URL=sqlite:///./app.db > .env`
-
-Добавить в пустой файл строку:
-
-`DATABASE_URL=sqlite:///./app.db`
 
 5. Находясь в `backend/` применить миграции:
 
