@@ -35,8 +35,7 @@ def index(
         gender = None  # игнорируем некорректные значения
 
     # Преобразуем age_min и age_max в int, если они не пустые
-    age_min_int = None
-    age_max_int = None
+    age_min_int, age_max_int = None, None
     if age_min is not None and age_min.isdigit():
         age_min_int = int(age_min)
     if age_max is not None and age_max.isdigit():
@@ -58,7 +57,7 @@ def index(
     
     employees_out = [EmployeeOut.model_validate(emp) for emp in employees]
 
-    # Общее количество (для пагинации)
+    # Общее количество для пагинации
     total_employees = count_employees(
         db=db,
         search=search,
@@ -68,7 +67,7 @@ def index(
     )
     total_pages = (total_employees + limit - 1) // limit  # округление вверх
 
-    # Флаги для кнопок "Назад"/"Вперёд" (опционально, если используешь)
+    # Флаги для кнопок "Назад"/"Вперёд" 
     has_next = page < total_pages
     has_prev = page > 1
 

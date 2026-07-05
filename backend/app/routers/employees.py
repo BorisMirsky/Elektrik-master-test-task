@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Optional, List
-
 from app.database import get_db
 from app.schemas import EmployeeCreate, EmployeeUpdate, EmployeeOut
 from app.crud import (
@@ -61,7 +60,6 @@ def update_employee_endpoint(
 
 @router.delete("/{employee_id}", status_code=204)
 def delete_employee_endpoint(employee_id: int, db: Session = Depends(get_db)):
-    """Удалить сотрудника."""
     deleted = delete_employee(db, employee_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Сотрудник не найден")

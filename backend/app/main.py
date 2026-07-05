@@ -26,7 +26,6 @@ templates = Jinja2Templates(directory="app/templates")
 app.include_router(employees.router)
 app.include_router(pages.router) 
 
-# Корневой эндпоинт для проверки
 @app.get("/")
 def root():
     return {"message": "API Реестра сотрудников работает. Документация: /docs"}

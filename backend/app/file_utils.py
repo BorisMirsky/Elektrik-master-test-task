@@ -8,12 +8,11 @@ def ensure_upload_dir():
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 async def save_upload_file(file: UploadFile) -> str:
-    # Сохраняет загруженный файл в папку uploads. Возвращает относительный URL для доступа к файлу.
+    # Сохраняет загруженный файл в папку images. Возвращает относительный URL для доступа к файлу.
     ensure_upload_dir()
     
-    # Генерируем уникальное имя, чтобы избежать конфликтов
-    file_extension = os.path.splitext(file.filename)[1]  # .jpg, .png и т.д.
-    unique_filename = f"{uuid.uuid4().hex}{file_extension}"
+    file_extension = os.path.splitext(file.filename)[1]           # .jpg, .png & etc
+    unique_filename = f"{uuid.uuid4().hex}{file_extension}"       # уникальное имя, чтобы избежать конфликтов
     file_path = os.path.join(UPLOAD_DIR, unique_filename)
     
     # Сохраняем файл
